@@ -30,14 +30,74 @@ class BinaryTree {
                 node.left = newNode
             }
         }
+
+       
     }
 
+    preOrder(node, callback){
+        if(!node){
+            return;
+        }
+        if(callback){
+            callback(node)
+        }
+        this.preOrder(node.left, callback)
+        this.preOrder(node.right, callback)
+    }
+    inOrder(node, callback){
+        if(!node){
+            return;
+        }
+        
+        this.preOrder(node.left, callback)
+        if(callback){
+            callback(node)
+        }
+        this.preOrder(node.right, callback)
+    }
+    postOrder(node, callback){
+        if(!node){
+            return;
+        }
+        
+        this.preOrder(node.left, callback)
+    
+        this.preOrder(node.right, callback)
+        if(callback){
+            callback(node)
+        }
+    }
+
+    traverseDFS(callback, method) {
+            if(method === 'preOrder'){
+                return this.preOrder(this.root, callback)
+            }
+
+            if(method === 'inOrder'){
+                return this.inOrder(this.root, callback)
+            }
+            return this.postOrder(this.root, callback)
+    }
+
+    traverseBFS(callback){                  
+        const queue = [this.root]
+
+        while(queue.length){
+            const node = queue.shift();
+            callback(node);
+            if(node.left){
+                queue.push(node.left)
+            }
+            if(node.right){
+                queue.push(node.right)
+            }
+        }
+    }
     print(root = this.root) {
         if (!root) {
             return true;
         }
         res.push(root.value)
-        console.log("                    " + root.value);
         this.print(root.left)
         this.print(root.right)
     }
@@ -64,4 +124,8 @@ tree.add(3)
 
 tree.print()
 
-console.log(tree)
+//console.log(tree)
+
+tree.traverseDFS((node) => {
+    console.log(node.value)
+}, 'postOrder')

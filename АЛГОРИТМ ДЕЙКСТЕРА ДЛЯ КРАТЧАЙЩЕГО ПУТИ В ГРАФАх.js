@@ -1,49 +1,51 @@
-const graph = {}
-graph.a = {b: 2, c: 1};
-graph.b = {f: 7};
-graph.c = {d: 5, e: 2}
-graph.d = {f: 2}
-graph.e = {f: 1}
-graph.f = {g: 1}
-graph.g = {}
-
-function shortPath(graph, start, end) {
-    const costs = {}
-    const processed = []
-    let neighbors = {}
-    Object.keys(graph).forEach(node =>{
-        if(node !== start) {
-            let value = graph[start][node]
-            costs[node] = value || 10000000
+function dextra(graph, startVertex) {
+    let visited = {};
+    let distances = {}; // кратчайшие пути из стартовой вершины
+    let previous = {}; // предыдущие вершины
+      
+    let vertices = Object.keys(graph); // список вершин графа
+    
+    // по умолчанию все расстояния неизвестны (бесконечны)
+    vertices.forEach(vertex => {
+      distances[vertex] = Infinity;
+      previous[vertex] = null;
+    });
+  
+    // расстояние до стартовой вершины равно 0
+    distances[startVertex] = 0;
+  
+    function handleVertex(vertex) {
+      // расстояние до вершины
+      let activeVertexDistance = distances[vertex]; 
+      
+      // смежные вершины (с расстоянием до них)
+      let neighbours = graph[activeVertex];
+      
+      // для всех смежных вершин пересчитать расстояния
+      Object.keys(neighbours).forEach(neighbourVertex => {
+        // известное на данный момент расстояние
+        let currentNeighbourDistance = distances[neighbourVertex];
+        // вычисленное расстояние
+        let newNeighbourDistance = activeVertexDistance + neighbours[neighbourVertex];
+        
+        if (newNeighbourDistance < currentNeighbourDistance) {
+          distances[neighbourVertex] = newNeighbourDistance;
+          previous[neighbourVertex] = vertex;
         }
-    })
-    let node = findNodeLowestCost(costs, processed)
-    while(node) {
-        const cost = costs[node]
-        neighbors = graph[node]
-        Object.keys(neighbors).forEach(neighbor =>{
-            let newCost = cost + neighbors[neighbor]
-            if(newCost < costs[neighbors]){
-                costs[neighbors] = newCost
-            }
-        })
-        processed.push(node)
-        node = findNodeLowestCost(costs, processed)
+      });
+      
+      // пометить вершину как посещенную
+      visited[vertex] = 1;
     }
-    return costs
-}
-
-function findNodeLowestCost(costs, processed) {
-    let lowestCost = 10000000
-    let lowestNode;
-    Object.keys(costs).forEach(node =>{
-        let cost = costs[node]
-        if(cost < lowestCost && !processed.includes(node)){
-            lowestCost = cost 
-            lowestNode = node
-        }
-    })
-    return lowestNode
-}
-
-console.log(shortPath(graph, 'a', 'g'))
+    
+    // ищем самую близкую вершину из необработанных
+    let activeVertex = findNearestVertex(distances, visited);
+  
+    // продолжаем цикл, пока остаются необработанные вершины 
+    while(activeVertex) {
+      handleVertex(activeVertex);
+      activeVertex = findNearestVertex(distances, visited);
+    }
+    
+    return { distances, previous };
+  }
